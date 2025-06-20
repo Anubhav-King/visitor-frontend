@@ -1,8 +1,8 @@
 // src/App.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import imageCompression from 'browser-image-compression';
-import React, { useRef } from "react";
+
 
 // Public VAPID key and backend URL
 const VAPID_PUBLIC_KEY =
@@ -53,9 +53,6 @@ export default function App() {
     photo: "",
     vBlock: "",
     vFlat: "",
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    },
   });
   // Fetch visitors whenever dependencies change
   useEffect(() => {
@@ -279,19 +276,22 @@ export default function App() {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchVisitors();
-    // Reset the form fields
-    setVisitorForm({
-      name: "",
-      purpose: "",
-      expectedArrival: "",
-      vehicleType: "none",
-      vehicleNumber: "",
-      contactNumber: "",
-      photo: "",
-      vBlock: "",
-      vFlat: "",
-    });
+  // Reset form and clear file input
+  setVisitorForm({
+    name: "",
+    purpose: "",
+    expectedArrival: "",
+    vehicleType: "none",
+    vehicleNumber: "",
+    contactNumber: "",
+    photo: "",
+    vBlock: "",
+    vFlat: "",
+  });
+  if (fileInputRef.current) {
+    fileInputRef.current.value = "";
   }
+
   const sendPushSubscription = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
@@ -596,66 +596,70 @@ export default function App() {
                 activeTab === "current" &&
                 ["approved", "pre-approved"].includes(v.status) &&
                 !v.actualArrival && (
-                  {(!v.photo || !v.vehicleType || !v.vehicleNumber) && (
-                    <div>
-                      {!v.photo && (
-                        <>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (!file) return;
+                  <>
+                    {(!v.photo || !v.vehicleType || !v.vehicleNumber) && (
+                      <div>
+                        {!v.photo && (
+                          <>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files[0];
+                                if (!file) return;
 
-                              const options = {
-                                maxSizeMB: 0.2,
-                                maxWidthOrHeight: 800,
-                                useWebWorker: true,
-                              };
-                              const compressed = await imageCompression(file, options);
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                updateVisitor(v._id, { photo: reader.result });
-                              };
-                              reader.readAsDataURL(compressed);
-                            }}
+                                const options = {
+                                  maxSizeMB: 0.2,
+                                  maxWidthOrHeight: 800,
+                                  useWebWorker: true,
+                                };
+                                const compressed = await imageCompression(file, options);
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  updateVisitor(v._id, { photo: reader.result });
+                                };
+                                reader.readAsDataURL(compressed);
+                              }}
+                            />
+                            <br />
+                          </>
+                        )}
+                        {!v.vehicleType && (
+                          <select
+                            onChange={(e) =>
+                              updateVisitor(v._id, { vehicleType: e.target.value })
+                            }
+                          >
+                            <option value="">Select Vehicle</option>
+                            <option value="Bike">Bike</option>
+                            <option value="Car">Car</option>
+                          </select>
+                        )}
+                        {!v.vehicleNumber && (
+                          <input
+                            placeholder="Vehicle Number"
+                            onBlur={(e) =>
+                              updateVisitor(v._id, { vehicleNumber: e.target.value })
+                            }
                           />
-                          <br />
-                        </>
-                      )}
-                      {!v.vehicleType && (
-                        <select
-                          onChange={(e) =>
-                            updateVisitor(v._id, { vehicleType: e.target.value })
-                          }
-                        >
-                          <option value="">Select Vehicle</option>
-                          <option value="Bike">Bike</option>
-                          <option value="Car">Car</option>
-                        </select>
-                      )}
-                      {!v.vehicleNumber && (
-                        <input
-                          placeholder="Vehicle Number"
-                          onBlur={(e) =>
-                            updateVisitor(v._id, { vehicleNumber: e.target.value })
-                          }
-                        />
-                      )}
-                    </div>
-                  )}
-                  {v.photo && (
-                    <button
-                      onClick={() =>
-                        updateVisitor(v._id, {
-                          actualArrival: new Date().toTimeString().slice(0, 5),
-                          status: "arrived",
-                        })
-                      }
-                    >
-                      Mark Arrived
-                    </button>
-                  )}
+                        )}
+                      </div>
+                    )}
+                    {v.photo && (
+                      <button
+                        onClick={() =>
+                          updateVisitor(v._id, {
+                            actualArrival: new Date().toTimeString().slice(0, 5),
+                            status: "arrived",
+                          })
+                        }
+                      >
+                        Mark Arrived
+                      </button>
+                    )}
+                  </>
+              )}
+
               {userInfo.role === "guard" &&
                 activeTab === "current" &&
                 v.actualArrival &&
