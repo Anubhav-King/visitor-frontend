@@ -96,8 +96,16 @@
     // Handle form field change
     function handleVisitorChange(e) {
       const { name, value } = e.target;
-      setVisitorForm((prev) => ({ ...prev, [name]: value }));
+      setVisitorForm((prev) => {
+        const updated = { ...prev, [name]: value };
+        // Clear vehicle number if "none" selected
+        if (name === "vehicleType" && value === "none") {
+          updated.vehicleNumber = "";
+        }
+        return updated;
+      });
     }
+
 
     function logout() {
       localStorage.clear();
@@ -417,13 +425,16 @@
                 <option value="Bike">Bike</option>
                 <option value="Car">Car</option>
               </select>
-              <input
-                name="vehicleNumber"
-                placeholder="Vehicle Number"
-                value={visitorForm.vehicleNumber}
-                onChange={handleVisitorChange}
-                style={{ marginRight: 10 }}
-              />
+              {["Bike", "Car"].includes(visitorForm.vehicleType) && (
+                <input
+                  name="vehicleNumber"
+                  placeholder="Vehicle Number"
+                  value={visitorForm.vehicleNumber}
+                  onChange={handleVisitorChange}
+                  style={{ marginRight: 10 }}
+                />
+              )}
+
               <input
                 name="contactNumber"
                 placeholder="Contact Number"
@@ -559,19 +570,22 @@
                             </>
                           )}
                           {!v.vehicleType && (
-                            <select
-                              onChange={(e) =>
-                                updateVisitor(v._id, {
-                                  vehicleType: e.target.value,
-                                })
-                              }
-                            >
-                              <option value="">Select Vehicle</option>
-                              <option value="Bike">Bike</option>
-                              <option value="Car">Car</option>
-                            </select>
+                          <select
+                            onChange={(e) =>
+                              updateVisitor(v._id, {
+                                vehicleType: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Select Vehicle</option>
+                            <option value="none">No Vehicle</option>
+                            <option value="Bike">Bike</option>
+                            <option value="Car">Car</option>
+                          </select>
+
                           )}
                           {!v.vehicleNumber && (
+                          {["Bike", "Car"].includes(v.vehicleType) && (
                             <input
                               placeholder="Vehicle Number"
                               onBlur={(e) =>
@@ -581,20 +595,25 @@
                               }
                             />
                           )}
+                          )}
                         </div>
                       )}
-                      {v.photo && v.vehicleType && v.vehicleNumber && (
-                        <button
-                          onClick={() =>
-                            updateVisitor(v._id, {
-                              actualArrival: new Date().toTimeString().slice(0, 5),
-                              status: "arrived",
-                            })
-                          }
-                        >
-                          Mark Arrived
-                        </button>
+                      {v.photo &&
+                        v.vehicleType &&
+                        (v.vehicleType === "none" ||
+                          (v.vehicleNumber && v.vehicleNumber.trim())) && (
+                          <button
+                            onClick={() =>
+                              updateVisitor(v._id, {
+                                actualArrival: new Date().toTimeString().slice(0, 5),
+                                status: "arrived",
+                              })
+                            }
+                          >
+                            Mark Arrived
+                          </button>
                       )}
+
                     </>
                   )}
 
