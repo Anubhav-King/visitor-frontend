@@ -555,8 +555,9 @@
                                   };
                                   const compressed = await imageCompression(file, options);
                                   const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    updateVisitor(v._id, { photo: reader.result });
+                                  reader.onloadend = async () => {
+                                    await updateVisitor(v._id, { photo: reader.result });
+                                    await fetchVisitors(); // ✅ immediately refresh after upload
                                   };
                                   reader.readAsDataURL(compressed);
                                 }}
@@ -567,9 +568,10 @@
 
                           {!v.vehicleType && (
                             <select
-                              onChange={(e) =>
-                                updateVisitor(v._id, { vehicleType: e.target.value })
-                              }
+                              onChange={async (e) => {
+                                await updateVisitor(v._id, { vehicleType: e.target.value });
+                                await fetchVisitors(); // ✅ immediately refresh after vehicle type change
+                              }}
                             >
                               <option value="">Select Vehicle</option>
                               <option value="none">No Vehicle</option>
@@ -581,34 +583,35 @@
                           {!v.vehicleNumber && ["Bike", "Car"].includes(v.vehicleType) && (
                             <input
                               placeholder="Vehicle Number"
-                              onBlur={(e) =>
-                                updateVisitor(v._id, {
+                              onBlur={async (e) => {
+                                await updateVisitor(v._id, {
                                   vehicleNumber: e.target.value,
-                                })
-                              }
+                                });
+                                await fetchVisitors(); // ✅ refresh after vehicle number
+                              }}
                             />
                           )}
-
                         </div>
                       )}
 
                       {v.photo &&
-                        ((v.vehicleType === "none") ||
-                         (["Bike", "Car"].includes(v.vehicleType) && v.vehicleNumber?.trim())) && (
+                        (v.vehicleType === "none" ||
+                          (["Bike", "Car"].includes(v.vehicleType) && v.vehicleNumber?.trim())) && (
                           <button
-                            onClick={() =>
-                              updateVisitor(v._id, {
+                            onClick={async () => {
+                              await updateVisitor(v._id, {
                                 actualArrival: new Date().toTimeString().slice(0, 5),
                                 status: "arrived",
-                              })
-                            }
+                              });
+                              await fetchVisitors(); // ✅ refresh after marking arrived
+                            }}
                           >
                             Mark Arrived
                           </button>
-                      )}
-
+                        )}
                     </>
                 )}
+
 
 
                 {/* Guard departure */}
