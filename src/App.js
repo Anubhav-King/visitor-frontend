@@ -562,15 +562,23 @@
                                     maxWidthOrHeight: 800,
                                     useWebWorker: true,
                                   };
-                                  const compressed = await imageCompression(file, options);
-                                  const reader = new FileReader();
-                                  reader.onloadend = async () => {
-                                    await updateVisitor(v._id, { photo: reader.result });
-                                    await fetchVisitors();
-                                  };
-                                  reader.readAsDataURL(compressed);
+
+                                  try {
+                                    const compressed = await imageCompression(file, options);
+                                    const reader = new FileReader();
+                                    reader.onloadend = async () => {
+                                      const base64 = reader.result;
+                                      console.log("📸 Compressed Photo Base64:", base64.slice(0, 100));
+                                      await updateVisitor(v._id, { photo: base64 });
+                                      await fetchVisitors();
+                                    };
+                                    reader.readAsDataURL(compressed);
+                                  } catch (err) {
+                                    console.error("Photo upload failed:", err);
+                                  }
                                 }}
                               />
+
                               <br />
                             </>
                           )}
