@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import imageCompression from 'browser-image-compression';
+import React, { useRef } from "react";
 
 // Public VAPID key and backend URL
 const VAPID_PUBLIC_KEY =
@@ -17,6 +18,7 @@ export default function App() {
   const [filterDate, setFilterDate] = useState("");
   const [isFiltering, setIsFiltering] = useState(false);
   const [enablePreApproval, setEnablePreApproval] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Auth state
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -51,6 +53,9 @@ export default function App() {
     photo: "",
     vBlock: "",
     vFlat: "",
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    },
   });
   // Fetch visitors whenever dependencies change
   useEffect(() => {
@@ -266,6 +271,10 @@ export default function App() {
       photo: visitorForm.photo,
       status: userInfo.role === "resident" ? "pre-approved" : "pending",
     };
+    if (!visitorForm.photo) {
+      alert("Photo is mandatory");
+      return;
+    }
     await axios.post(`${BASE_URL}/api/visitors`, body, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -497,6 +506,7 @@ export default function App() {
             type="file"
             accept="image/*"
             onChange={handlePhoto}
+            ref={fileInputRef}
             style={{ marginRight: 10 }}
           />
           <button onClick={addVisitor}>Add Visitor</button>
@@ -586,17 +596,66 @@ export default function App() {
                 activeTab === "current" &&
                 ["approved", "pre-approved"].includes(v.status) &&
                 !v.actualArrival && (
-                  <button
-                    onClick={() =>
-                      updateVisitor(v._id, {
-                        actualArrival: new Date().toTimeString().slice(0, 5),
-                        status: "arrived",
-                      })
-                    }
-                  >
-                    Mark Arrived
-                  </button>
-                )}
+                  {(!v.photo || !v.vehicleType || !v.vehicleNumber) && (
+                    <div>
+                      {!v.photo && (
+                        <>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (!file) return;
+
+                              const options = {
+                                maxSizeMB: 0.2,
+                                maxWidthOrHeight: 800,
+                                useWebWorker: true,
+                              };
+                              const compressed = await imageCompression(file, options);
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                updateVisitor(v._id, { photo: reader.result });
+                              };
+                              reader.readAsDataURL(compressed);
+                            }}
+                          />
+                          <br />
+                        </>
+                      )}
+                      {!v.vehicleType && (
+                        <select
+                          onChange={(e) =>
+                            updateVisitor(v._id, { vehicleType: e.target.value })
+                          }
+                        >
+                          <option value="">Select Vehicle</option>
+                          <option value="Bike">Bike</option>
+                          <option value="Car">Car</option>
+                        </select>
+                      )}
+                      {!v.vehicleNumber && (
+                        <input
+                          placeholder="Vehicle Number"
+                          onBlur={(e) =>
+                            updateVisitor(v._id, { vehicleNumber: e.target.value })
+                          }
+                        />
+                      )}
+                    </div>
+                  )}
+                  {v.photo && (
+                    <button
+                      onClick={() =>
+                        updateVisitor(v._id, {
+                          actualArrival: new Date().toTimeString().slice(0, 5),
+                          status: "arrived",
+                        })
+                      }
+                    >
+                      Mark Arrived
+                    </button>
+                  )}
               {userInfo.role === "guard" &&
                 activeTab === "current" &&
                 v.actualArrival &&
