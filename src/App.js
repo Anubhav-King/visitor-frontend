@@ -213,13 +213,32 @@ export default function App() {
   }
 
   // Handle photo upload
-  function handlePhoto(e) {
+  import imageCompression from 'browser-image-compression';
+
+  async function handlePhoto(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const r = new FileReader();
-    r.onloadend = () => setVisitorForm((f) => ({ ...f, photo: r.result }));
-    r.readAsDataURL(file);
+
+    try {
+      // ✅ Compress the image
+      const options = {
+        maxSizeMB: 0.2, // ~200KB
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+
+      // ✅ Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setVisitorForm((prev) => ({ ...prev, photo: reader.result }));
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (err) {
+      console.error("❌ Image compression failed:", err);
+    }
   }
+
 
   // Add new visitor
   async function addVisitor() {
