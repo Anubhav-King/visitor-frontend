@@ -578,17 +578,17 @@
                             </select>
                           )}
 
-                          {!v.vehicleNumber &&
-                            ["Bike", "Car"].includes(v.vehicleType) && (
-                              <input
-                                placeholder="Vehicle Number"
-                                onBlur={(e) =>
-                                  updateVisitor(v._id, {
-                                    vehicleNumber: e.target.value,
-                                  })
-                                }
-                              />
-                            )}
+                          {!v.vehicleNumber && ["Bike", "Car"].includes(v.vehicleType) && (
+                            <input
+                              placeholder="Vehicle Number"
+                              onBlur={(e) =>
+                                updateVisitor(v._id, {
+                                  vehicleNumber: e.target.value,
+                                })
+                              }
+                            />
+                          )}
+
                         </div>
                       )}
 
