@@ -16,6 +16,7 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [isFiltering, setIsFiltering] = useState(false);
+  const [enablePreApproval, setEnablePreApproval] = useState(false);
 
   // Auth state
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -339,7 +340,22 @@ export default function App() {
           </button>
           <button onClick={handleChangePassword}>Change Password</button>
         </div>
+
+        {userInfo.role === "resident" && (
+          <div style={{ marginTop: 10 }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={enablePreApproval}
+                onChange={(e) => setEnablePreApproval(e.target.checked)}
+                style={{ marginRight: 10 }}
+              />
+              Enable Pre‑Approved Visitor Entry
+            </label>
+          </div>
+        )}
       </p>
+
 
       {/* Tabs */}
       <div style={{ margin: "20px 0" }}>
@@ -410,7 +426,7 @@ export default function App() {
       )}
 
       {/* Visitor form (current only) */}
-      {activeTab === "current" && (
+      {activeTab === "current" && (userInfo.role !== "resident" || enablePreApproval) && (
         <div style={{ marginBottom: 20 }}>
           <input
             name="name"
