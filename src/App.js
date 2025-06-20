@@ -584,8 +584,7 @@
                           </select>
 
                           )}
-                          {!v.vehicleNumber && (
-                          {["Bike", "Car"].includes(v.vehicleType) && (
+                          {!v.vehicleNumber && ["Bike", "Car"].includes(v.vehicleType) && (
                             <input
                               placeholder="Vehicle Number"
                               onBlur={(e) =>
@@ -595,6 +594,7 @@
                               }
                             />
                           )}
+
                           )}
                         </div>
                       )}
