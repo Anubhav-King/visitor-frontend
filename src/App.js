@@ -660,6 +660,7 @@ export default function App() {
                   </>
               )}
 
+
               {userInfo.role === "guard" &&
                 activeTab === "current" &&
                 v.actualArrival &&
