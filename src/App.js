@@ -534,14 +534,6 @@
                   ["approved", "pre-approved"].includes(v.status) &&
                   !v.actualArrival && (
                     <>
-                      {/* 🔍 Debug Info */}
-                      <pre style={{ backgroundColor: "#f9f9f9", padding: "10px", border: "1px dashed #ccc" }}>
-                        Debug:
-                        {"\n"}Photo: {v.photo ? "✅" : "❌"}
-                        {"\n"}Vehicle Type: {v.vehicleType || "❌"}
-                        {"\n"}Vehicle Number: {["Bike", "Car"].includes(v.vehicleType) ? v.vehicleNumber || "❌" : "N/A"}
-                      </pre>
-
                       {/* Upload missing fields */}
                       {(!v.photo || !v.vehicleType || (!v.vehicleNumber && v.vehicleType !== "none")) && (
                         <div>
