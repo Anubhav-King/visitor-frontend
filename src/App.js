@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import imageCompression from 'browser-image-compression';
 
 // Public VAPID key and backend URL
 const VAPID_PUBLIC_KEY =
@@ -213,7 +214,6 @@ export default function App() {
   }
 
   // Handle photo upload
-  import imageCompression from 'browser-image-compression';
 
   async function handlePhoto(e) {
     const file = e.target.files[0];
