@@ -593,8 +593,8 @@
                       )}
 
                       {v.photo &&
-                        v.vehicleType &&
-                        (v.vehicleType === "none" || (v.vehicleNumber && v.vehicleNumber.trim())) && (
+                        ((v.vehicleType === "none") ||
+                         (["Bike", "Car"].includes(v.vehicleType) && v.vehicleNumber?.trim())) && (
                           <button
                             onClick={() =>
                               updateVisitor(v._id, {
@@ -605,7 +605,8 @@
                           >
                             Mark Arrived
                           </button>
-                        )}
+                      )}
+
                     </>
                 )}
 
