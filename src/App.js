@@ -165,42 +165,59 @@
       const body = {
         name: visitorForm.name,
         purpose: visitorForm.purpose,
-        block: userInfo.role === "guard" ? Number(visitorForm.vBlock) : Number(userInfo.block),
-        flat: userInfo.role === "guard" ? Number(visitorForm.vFlat) : Number(userInfo.flat),
+        block:
+          userInfo.role === "guard"
+            ? Number(visitorForm.vBlock)
+            : Number(userInfo.block),
+        flat:
+          userInfo.role === "guard"
+            ? Number(visitorForm.vFlat)
+            : Number(userInfo.flat),
         expectedArrival: visitorForm.expectedArrival,
-        vehicleType: visitorForm.vehicleType === "none" ? undefined : visitorForm.vehicleType,
-        vehicleNumber: visitorForm.vehicleNumber.trim() ? visitorForm.vehicleNumber : undefined,
+        vehicleType:
+          visitorForm.vehicleType === "none"
+            ? undefined
+            : visitorForm.vehicleType,
+        vehicleNumber: visitorForm.vehicleNumber.trim()
+          ? visitorForm.vehicleNumber
+          : undefined,
         contactNumber: visitorForm.contactNumber,
         photo: visitorForm.photo,
         status: userInfo.role === "resident" ? "pre-approved" : "pending",
       };
-      if (!visitorForm.photo || visitorForm.photo.trim() === "") {
-        alert("Photo is mandatory");
+
+      // ✅ Only guard must provide a photo at submission time
+      if (userInfo.role === "guard" && !visitorForm.photo) {
+        alert("Photo is mandatory for guards");
         return;
       }
 
-
-      await axios.post(`${BASE_URL}/api/visitors`, body, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      fetchVisitors();
-
-      setVisitorForm({
-        name: "",
-        purpose: "",
-        expectedArrival: "",
-        vehicleType: "none",
-        vehicleNumber: "",
-        contactNumber: "",
-        photo: "",
-        vBlock: "",
-        vFlat: "",
-      });
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      try {
+        await axios.post(`${BASE_URL}/api/visitors`, body, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        fetchVisitors();
+        // ✅ Reset form and file input
+        setVisitorForm({
+          name: "",
+          purpose: "",
+          expectedArrival: "",
+          vehicleType: "none",
+          vehicleNumber: "",
+          contactNumber: "",
+          photo: "",
+          vBlock: "",
+          vFlat: "",
+        });
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } catch (err) {
+        alert("Failed to add visitor");
+        console.error(err);
       }
     }
+
     const handleChangePassword = async () => {
       const oldPassword = prompt("Enter old password:");
       const newPassword = prompt("Enter new password:");
