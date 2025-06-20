@@ -182,10 +182,7 @@
             ? Number(visitorForm.vFlat)
             : Number(userInfo.flat),
         expectedArrival: visitorForm.expectedArrival,
-        vehicleType:
-          visitorForm.vehicleType === "none"
-            ? undefined
-            : visitorForm.vehicleType,
+        vehicleType: visitorForm.vehicleType, // ✅ always send value ("Bike", "Car", or "none")
         vehicleNumber: visitorForm.vehicleNumber.trim()
           ? visitorForm.vehicleNumber
           : undefined,
