@@ -537,6 +537,15 @@
                   ["approved", "pre-approved"].includes(v.status) &&
                   !v.actualArrival && (
                     <>
+                      {/* 🔍 Debug Info */}
+                      <pre style={{ backgroundColor: "#f9f9f9", padding: "10px", border: "1px dashed #ccc" }}>
+                        Debug:
+                        {"\n"}Photo: {v.photo ? "✅" : "❌"}
+                        {"\n"}Vehicle Type: {v.vehicleType || "❌"}
+                        {"\n"}Vehicle Number: {["Bike", "Car"].includes(v.vehicleType) ? v.vehicleNumber || "❌" : "N/A"}
+                      </pre>
+
+                      {/* Upload missing fields */}
                       {(!v.photo || !v.vehicleType || (!v.vehicleNumber && v.vehicleType !== "none")) && (
                         <div>
                           {!v.photo && (
@@ -557,7 +566,7 @@
                                   const reader = new FileReader();
                                   reader.onloadend = async () => {
                                     await updateVisitor(v._id, { photo: reader.result });
-                                    await fetchVisitors(); // ✅ immediately refresh after upload
+                                    await fetchVisitors();
                                   };
                                   reader.readAsDataURL(compressed);
                                 }}
@@ -570,7 +579,7 @@
                             <select
                               onChange={async (e) => {
                                 await updateVisitor(v._id, { vehicleType: e.target.value });
-                                await fetchVisitors(); // ✅ immediately refresh after vehicle type change
+                                await fetchVisitors();
                               }}
                             >
                               <option value="">Select Vehicle</option>
@@ -587,13 +596,14 @@
                                 await updateVisitor(v._id, {
                                   vehicleNumber: e.target.value,
                                 });
-                                await fetchVisitors(); // ✅ refresh after vehicle number
+                                await fetchVisitors();
                               }}
                             />
                           )}
                         </div>
                       )}
 
+                      {/* ✅ Show button only when all required fields are present */}
                       {v.photo &&
                         (v.vehicleType === "none" ||
                           (["Bike", "Car"].includes(v.vehicleType) && v.vehicleNumber?.trim())) && (
@@ -603,7 +613,7 @@
                                 actualArrival: new Date().toTimeString().slice(0, 5),
                                 status: "arrived",
                               });
-                              await fetchVisitors(); // ✅ refresh after marking arrived
+                              await fetchVisitors();
                             }}
                           >
                             Mark Arrived
@@ -611,6 +621,7 @@
                         )}
                     </>
                 )}
+
 
 
 
