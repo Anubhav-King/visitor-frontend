@@ -170,6 +170,35 @@
     }
 
     async function addVisitor() {
+      const requiredFields = ["name", "purpose", "expectedArrival", "contactNumber"];
+      const missingFields = [];
+
+      requiredFields.forEach((field) => {
+        if (!visitorForm[field]?.trim()) {
+          missingFields.push(field);
+        }
+      });
+
+      // Extra checks for guard
+      if (userInfo.role === "guard") {
+        if (!visitorForm.vBlock?.trim()) missingFields.push("block");
+        if (!visitorForm.vFlat?.trim()) missingFields.push("flat");
+        if (!visitorForm.photo) missingFields.push("photo");
+      }
+
+      // If vehicle type is Bike or Car, vehicleNumber is mandatory
+      if (
+        ["Bike", "Car"].includes(visitorForm.vehicleType) &&
+        !visitorForm.vehicleNumber?.trim()
+      ) {
+        missingFields.push("vehicleNumber");
+      }
+
+      if (missingFields.length > 0) {
+        alert("Please fill all required fields: " + missingFields.join(", "));
+        return;
+      }
+
       const body = {
         name: visitorForm.name,
         purpose: visitorForm.purpose,
@@ -182,8 +211,8 @@
             ? Number(visitorForm.vFlat)
             : Number(userInfo.flat),
         expectedArrival: visitorForm.expectedArrival,
-        vehicleType: visitorForm.vehicleType, // ✅ always send value ("Bike", "Car", or "none")
-        vehicleNumber: visitorForm.vehicleNumber.trim()
+        vehicleType: visitorForm.vehicleType,
+        vehicleNumber: visitorForm.vehicleNumber?.trim()
           ? visitorForm.vehicleNumber
           : undefined,
         contactNumber: visitorForm.contactNumber,
@@ -191,18 +220,11 @@
         status: userInfo.role === "resident" ? "pre-approved" : "pending",
       };
 
-      // ✅ Only guard must provide a photo at submission time
-      if (userInfo.role === "guard" && !visitorForm.photo) {
-        alert("Photo is mandatory for guards");
-        return;
-      }
-
       try {
         await axios.post(`${BASE_URL}/api/visitors`, body, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchVisitors();
-        // ✅ Reset form and file input
         setVisitorForm({
           name: "",
           purpose: "",
@@ -222,7 +244,6 @@
         console.error(err);
       }
     }
-
     const handleChangePassword = async () => {
       const oldPassword = prompt("Enter old password:");
       const newPassword = prompt("Enter new password:");
