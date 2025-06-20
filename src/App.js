@@ -537,7 +537,7 @@
                   ["approved", "pre-approved"].includes(v.status) &&
                   !v.actualArrival && (
                     <>
-                      {(!v.photo || !v.vehicleType || !v.vehicleNumber) && (
+                      {(!v.photo || !v.vehicleType || (!v.vehicleNumber && v.vehicleType !== "none")) && (
                         <div>
                           {!v.photo && (
                             <>
@@ -553,15 +553,10 @@
                                     maxWidthOrHeight: 800,
                                     useWebWorker: true,
                                   };
-                                  const compressed = await imageCompression(
-                                    file,
-                                    options
-                                  );
+                                  const compressed = await imageCompression(file, options);
                                   const reader = new FileReader();
                                   reader.onloadend = () => {
-                                    updateVisitor(v._id, {
-                                      photo: reader.result,
-                                    });
+                                    updateVisitor(v._id, { photo: reader.result });
                                   };
                                   reader.readAsDataURL(compressed);
                                 }}
@@ -569,39 +564,37 @@
                               <br />
                             </>
                           )}
+
                           {!v.vehicleType && (
-                          <select
-                            onChange={(e) =>
-                              updateVisitor(v._id, {
-                                vehicleType: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Select Vehicle</option>
-                            <option value="none">No Vehicle</option>
-                            <option value="Bike">Bike</option>
-                            <option value="Car">Car</option>
-                          </select>
-
-                          )}
-                          {!v.vehicleNumber && ["Bike", "Car"].includes(v.vehicleType) && (
-                            <input
-                              placeholder="Vehicle Number"
-                              onBlur={(e) =>
-                                updateVisitor(v._id, {
-                                  vehicleNumber: e.target.value,
-                                })
+                            <select
+                              onChange={(e) =>
+                                updateVisitor(v._id, { vehicleType: e.target.value })
                               }
-                            />
+                            >
+                              <option value="">Select Vehicle</option>
+                              <option value="none">No Vehicle</option>
+                              <option value="Bike">Bike</option>
+                              <option value="Car">Car</option>
+                            </select>
                           )}
 
-                          )}
+                          {!v.vehicleNumber &&
+                            ["Bike", "Car"].includes(v.vehicleType) && (
+                              <input
+                                placeholder="Vehicle Number"
+                                onBlur={(e) =>
+                                  updateVisitor(v._id, {
+                                    vehicleNumber: e.target.value,
+                                  })
+                                }
+                              />
+                            )}
                         </div>
                       )}
+
                       {v.photo &&
                         v.vehicleType &&
-                        (v.vehicleType === "none" ||
-                          (v.vehicleNumber && v.vehicleNumber.trim())) && (
+                        (v.vehicleType === "none" || (v.vehicleNumber && v.vehicleNumber.trim())) && (
                           <button
                             onClick={() =>
                               updateVisitor(v._id, {
@@ -612,10 +605,10 @@
                           >
                             Mark Arrived
                           </button>
-                      )}
-
+                        )}
                     </>
-                  )}
+                )}
+
 
                 {/* Guard departure */}
                 {userInfo.role === "guard" &&
