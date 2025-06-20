@@ -93,6 +93,12 @@
       }
     }
 
+    // Handle form field change
+    function handleVisitorChange(e) {
+      const { name, value } = e.target;
+      setVisitorForm((prev) => ({ ...prev, [name]: value }));
+    }
+
     function logout() {
       localStorage.clear();
       setToken("");
