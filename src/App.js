@@ -174,10 +174,11 @@
         photo: visitorForm.photo,
         status: userInfo.role === "resident" ? "pre-approved" : "pending",
       };
-      if (!visitorForm.photo) {
+      if (!visitorForm.photo || visitorForm.photo.trim() === "") {
         alert("Photo is mandatory");
         return;
       }
+
 
       await axios.post(`${BASE_URL}/api/visitors`, body, {
         headers: { Authorization: `Bearer ${token}` },
@@ -565,13 +566,11 @@
                           )}
                         </div>
                       )}
-                      {v.photo && (
+                      {v.photo && v.vehicleType && v.vehicleNumber && (
                         <button
                           onClick={() =>
                             updateVisitor(v._id, {
-                              actualArrival: new Date()
-                                .toTimeString()
-                                .slice(0, 5),
+                              actualArrival: new Date().toTimeString().slice(0, 5),
                               status: "arrived",
                             })
                           }
